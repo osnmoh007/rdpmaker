@@ -186,6 +186,7 @@ docker run -d \
     -e USERNAME="$USERNAME" \
     -e PASSWORD="$PASSWORD" \
     --name "$CONTAINER_NAME" \
+    --restart always \
     dockurr/windows
     /bin/bash -c "tail -f /dev/null"
 echo "Script execution complete."
