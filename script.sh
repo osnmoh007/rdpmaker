@@ -180,7 +180,6 @@ docker run -d \
     -v "$VOLUME_PATH:/storage" \
     --device=/dev/kvm \
     --cap-add NET_ADMIN \
-    --stop-timeout 120 \
     -e VERSION="$WINDOWS_CODE" \
     -e RAM_SIZE="$RAM_SIZE" \
     -e CPU_CORES="$CPU_CORES" \
