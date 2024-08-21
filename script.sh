@@ -203,6 +203,7 @@ docker run -d \
     -p $RDP_PORT:3389/udp \
     -p $VNC_PORT:8006 \
     -v "$VOLUME_PATH:/storage" \
+    -v "./oem:/oem" \
     --device=/dev/kvm \
     --cap-add NET_ADMIN \
     -e VERSION="$WINDOWS_CODE" \
