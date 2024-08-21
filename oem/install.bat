@@ -9,3 +9,6 @@ reg delete "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v Defau
 
 :: Optionally clear Default Domain Name
 reg delete "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v DefaultDomainName /f
+
+:: Reboot the system
+shutdown /r /t 0
