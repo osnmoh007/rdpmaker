@@ -16,8 +16,9 @@ Welcome to the Windows Docker Container Setup Script! This project provides a Ba
 
 ## 📋 Prerequisites
 
-- **Operating System:** Ubuntu (or any Linux distribution that supports Docker).
+- **Operating System:** Ubuntu .
 - **Docker:** The script will check for Docker and install it if necessary.
+> **Note:** This script is designed to run on Ubuntu. Other Linux distributions may require modifications.
 
 ## 🏃 Usage
 
