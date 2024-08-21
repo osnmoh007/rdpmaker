@@ -94,6 +94,8 @@ This command will set up a Docker container running Windows 10 Pro (`win10`), wi
 
 This project is based on [dockur/windows](https://github.com/dockur/windows/tree/master). Huge thanks to the original creator for their work!
 
+Special thanks to ChatGPT for the support and assistance throughout this project.
+
 ## 📄 License
 
 This project is licensed under the MIT License.
