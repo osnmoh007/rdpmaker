@@ -48,7 +48,7 @@ Welcome to the Windows Docker Container Setup Script! This project provides a Ba
 
    If you run the script without flags, you'll be prompted to enter the options interactively.
 
-### 🛠 Command-Line Options
+## 🛠 Command-Line Options
 
 - `-r RAM_SIZE`: Set the RAM size (e.g., `4` for `4G`).
 - `-c CPU_CORES`: Set the number of CPU cores (e.g., `2`).
@@ -60,7 +60,7 @@ Welcome to the Windows Docker Container Setup Script! This project provides a Ba
 - `-v VNC_PORT`: Set the VNC port (default: `8006`).
 - `-h`: Display help message.
 
-### 📑 Example
+## 📑 Example
 
 ```bash
 ./run.sh -r 8 -c 4 -d 64 -m MyMachine -u admin -p mypassword -R 3390 -v 5901
