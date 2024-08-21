@@ -1,4 +1,5 @@
 
+```markdown
 # Windows Docker Container Setup Script
 
 This project provides a Bash script to create and run a Docker container with various Windows versions. The script allows for the customization of the container's RAM size, CPU cores, disk size, machine name, and ports. It also includes a check to ensure Docker is installed and installs it if necessary.
@@ -23,27 +24,29 @@ This project provides a Bash script to create and run a Docker container with va
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/yourusername/windows-docker-setup.git
-   cd windows-docker-setup
+   git clone https://github.com/osnmoh007/rdpmaker.git
+   cd rdpmaker
    ```
 
 2. **Make the script executable:**
 
    ```bash
-   chmod +x setup-windows-container.sh
+   chmod +x run.sh
    ```
 
-3. **Run the script with options:**
+3. **Run the script with or without options:**
+
+   You can either use flags to specify the options directly or let the script prompt you for them when it runs.
+
+   **Using Flags:**
 
    ```bash
-   ./setup-windows-container.sh [-r RAM_SIZE] [-c CPU_CORES] [-d DISK_SIZE] [-m MACHINE_NAME] [-u USERNAME] [-p PASSWORD] [-R RDP_PORT] [-v VNC_PORT] [-h]
+   ./run.sh [-r RAM_SIZE] [-c CPU_CORES] [-d DISK_SIZE] [-m MACHINE_NAME] [-u USERNAME] [-p PASSWORD] [-R RDP_PORT] [-v VNC_PORT] [-h]
    ```
 
-**Example:**
+   **Without Flags:**
 
-   ```bash
-   ./setup-windows-container.sh -r 8 -c 4 -d 64 -m MyMachine -u admin -p mypassword -R 3389 -v 5900
-   ```
+   If you run the script without flags, you will be prompted to enter the options interactively.
 
 ### Command-Line Options
 
@@ -56,6 +59,14 @@ This project provides a Bash script to create and run a Docker container with va
 - `-R RDP_PORT`: Set the RDP port (default: `3389`).
 - `-v VNC_PORT`: Set the VNC port (default: `8006`).
 - `-h`: Display help message.
+
+### Example
+
+```bash
+./run.sh -r 8 -c 4 -d 64 -m MyMachine -u admin -p mypassword -R 3390 -v 5901
+```
+
+This command will set up a Docker container running Windows 10 Pro (`win10`), with 8GB of RAM, 4 CPU cores, a 64GB disk, and use RDP port `3390` and VNC port `5901`.
 
 ## Windows Versions Available
 
@@ -78,25 +89,11 @@ This project provides a Bash script to create and run a Docker container with va
 - `tiny11`: Tiny 11
 - `tiny10`: Tiny 10
 
-## Example Run
-
-```bash
-./setup-windows-container.sh -r 8 -c 4 -d 64 -m MyMachine -u admin -p mypassword -R 3390 -v 5901
-```
-
-This command will set up a Docker container running Windows 10 Pro (`win10`), with 8GB of RAM, 4 CPU cores, a 64GB disk, and use RDP port `3390` and VNC port `5901`.
-
 ## Acknowledgments
 
 This project is based on [dockur/windows](https://github.com/dockur/windows/tree/master). Huge thanks to the original creator for their work!
 
-## Contributing
-
-Feel free to submit issues or pull requests if you find any bugs or want to add features.
-
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
 ```
-
-You can now use this as the `README.md` file in your GitHub repository.
