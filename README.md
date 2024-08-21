@@ -1,6 +1,5 @@
 
 
-```markdown
 # 🪟 Windows Docker Container Setup Script 🚀
 
 Welcome to the Windows Docker Container Setup Script! This project provides a Bash script to create and run a Docker container with various Windows versions. Customize your container's RAM size, CPU cores, disk size, machine name, and ports effortlessly.
