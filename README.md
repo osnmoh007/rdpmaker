@@ -1,25 +1,26 @@
 
+
 ```markdown
-# Windows Docker Container Setup Script
+# 🪟 Windows Docker Container Setup Script 🚀
 
-This project provides a Bash script to create and run a Docker container with various Windows versions. The script allows for the customization of the container's RAM size, CPU cores, disk size, machine name, and ports. It also includes a check to ensure Docker is installed and installs it if necessary.
+Welcome to the Windows Docker Container Setup Script! This project provides a Bash script to create and run a Docker container with various Windows versions. Customize your container's RAM size, CPU cores, disk size, machine name, and ports effortlessly.
 
-## Features
+## ✨ Features
 
-- Choose from a variety of Windows versions (e.g., Windows 11 Pro, Windows 10 LTSC, Tiny 11, etc.).
-- Customize RAM size, CPU cores, and disk size for the container.
-- Set custom machine name, username, and password.
-- Specify RDP and VNC ports, with automatic checks to ensure the ports are available.
-- Auto-creation of storage volume directories.
-- Automatically installs Docker if it is not already installed.
-- Includes the necessary volume mappings, including a custom `./oem` directory.
+- 🎨 Choose from a variety of Windows versions (e.g., Windows 11 Pro, Windows 10 LTSC, Tiny 11, etc.).
+- 🛠 Customize RAM size, CPU cores, and disk size for your container.
+- 🖥 Set custom machine name, username, and password.
+- 🔐 Specify RDP and VNC ports, with automatic checks to ensure availability.
+- 📂 Auto-create storage volume directories.
+- 🐳 Automatically installs Docker if it's not already installed.
+- 📁 Includes necessary volume mappings, including a custom `./oem` directory.
 
-## Prerequisites
+## 📋 Prerequisites
 
 - **Operating System:** Ubuntu (or any Linux distribution that supports Docker).
 - **Docker:** The script will check for Docker and install it if necessary.
 
-## Usage
+## 🏃 Usage
 
 1. **Clone the repository:**
 
@@ -36,7 +37,7 @@ This project provides a Bash script to create and run a Docker container with va
 
 3. **Run the script with or without options:**
 
-   You can either use flags to specify the options directly or let the script prompt you for them when it runs.
+   You can either use flags to specify the options directly or let the script prompt you interactively.
 
    **Using Flags:**
 
@@ -46,9 +47,9 @@ This project provides a Bash script to create and run a Docker container with va
 
    **Without Flags:**
 
-   If you run the script without flags, you will be prompted to enter the options interactively.
+   If you run the script without flags, you'll be prompted to enter the options interactively.
 
-### Command-Line Options
+### 🛠 Command-Line Options
 
 - `-r RAM_SIZE`: Set the RAM size (e.g., `4` for `4G`).
 - `-c CPU_CORES`: Set the number of CPU cores (e.g., `2`).
@@ -60,7 +61,7 @@ This project provides a Bash script to create and run a Docker container with va
 - `-v VNC_PORT`: Set the VNC port (default: `8006`).
 - `-h`: Display help message.
 
-### Example
+### 📑 Example
 
 ```bash
 ./run.sh -r 8 -c 4 -d 64 -m MyMachine -u admin -p mypassword -R 3390 -v 5901
@@ -68,7 +69,7 @@ This project provides a Bash script to create and run a Docker container with va
 
 This command will set up a Docker container running Windows 10 Pro (`win10`), with 8GB of RAM, 4 CPU cores, a 64GB disk, and use RDP port `3390` and VNC port `5901`.
 
-## Windows Versions Available
+## 🖥 Available Windows Versions
 
 - `win11`: Windows 11 Pro
 - `win11e`: Windows 11 Enterprise
@@ -89,11 +90,12 @@ This command will set up a Docker container running Windows 10 Pro (`win10`), wi
 - `tiny11`: Tiny 11
 - `tiny10`: Tiny 10
 
-## Acknowledgments
+## 🙌 Acknowledgments
 
 This project is based on [dockur/windows](https://github.com/dockur/windows/tree/master). Huge thanks to the original creator for their work!
 
-## License
+## 📄 License
 
 This project is licensed under the MIT License.
+
 ```
