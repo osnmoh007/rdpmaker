@@ -28,7 +28,7 @@ usage() {
     echo "Usage: $0 [-r RAM_SIZE] [-c CPU_CORES] [-d DISK_SIZE] [-u USERNAME] [-p PASSWORD] [-m MACHINE_NAME] [-R RDP_PORT] [-v VNC_PORT]"
     echo "  -r  RAM_SIZE       Set RAM size (e.g., 14 for 14G)"
     echo "  -c  CPU_CORES      Set the number of CPU cores (e.g., 6)"
-    echo "  -d  DISK_SIZE      Set the disk size (e.g., 64G)"
+    echo "  -d  DISK_SIZE      Set the disk size (e.g., 64 for 64G)"
     echo "  -u  USERNAME       Set the username for the Windows machine"
     echo "  -p  PASSWORD       Set the password for the Windows machine"
     echo "  -m  MACHINE_NAME   Set the machine name"
@@ -36,6 +36,17 @@ usage() {
     echo "  -v  VNC_PORT       Set the VNC port"
     exit 1
 }
+
+# Check the Linux distribution
+DISTRO=$(lsb_release -is 2>/dev/null)
+if [[ "$DISTRO" != "Ubuntu" ]]; then
+    echo "Warning: This script is designed for Ubuntu. It may not work correctly on other distributions."
+    read -p "Do you want to proceed? (y/n): " response
+    if [[ "$response" != "y" ]]; then
+        echo "Exiting..."
+        exit 0
+    fi
+fi
 
 # Parse command-line arguments
 while [[ "$#" -gt 0 ]]; do
