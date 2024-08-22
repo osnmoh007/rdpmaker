@@ -20,13 +20,15 @@ check_port() {
 
 # Function to display usage
 usage() {
-    echo "Usage: $0 [-r RAM_SIZE] [-c CPU_CORES] [-d DISK_SIZE] [-u USERNAME] [-p PASSWORD] [-m MACHINE_NAME]"
+    echo "Usage: $0 [-r RAM_SIZE] [-c CPU_CORES] [-d DISK_SIZE] [-u USERNAME] [-p PASSWORD] [-m MACHINE_NAME] [-R RDP_PORT] [-v VNC_PORT]"
     echo "  -r  RAM_SIZE       Set RAM size (e.g., 14 for 14G)"
     echo "  -c  CPU_CORES      Set the number of CPU cores (e.g., 6)"
     echo "  -d  DISK_SIZE      Set the disk size (e.g., 64G)"
     echo "  -u  USERNAME       Set the username for the Windows machine"
     echo "  -p  PASSWORD       Set the password for the Windows machine"
     echo "  -m  MACHINE_NAME   Set the machine name"
+    echo "  -R  RDP_PORT       Set the RDP port"
+    echo "  -v  VNC_PORT       Set the VNC port"
     exit 1
 }
 
@@ -39,6 +41,8 @@ while [[ "$#" -gt 0 ]]; do
         -u) USERNAME="$2"; shift ;;
         -p) PASSWORD="$2"; shift ;;
         -m) MACHINE_NAME="$2"; shift ;;
+        -R) RDP_PORT="$2"; shift ;;
+        -v) VNC_PORT="$2"; shift ;;
         *) usage ;;
     esac
     shift
@@ -155,25 +159,31 @@ if [ -z "$PASSWORD" ]; then
     echo
 fi
 
-# Prompt for RDP port and VNC port, and check for availability
-while true; do
-    read -p "Enter the RDP port: " RDP_PORT
-    read -p "Enter the VNC port: " VNC_PORT
+if [ -z "$RDP_PORT" ]; then
+    while true; do
+        read -p "Enter the RDP port: " RDP_PORT
 
-    # Check the availability of RDP port
-    if ! check_port $RDP_PORT; then
-        echo "RDP port $RDP_PORT is already in use. Please choose a different port."
-        continue
-    fi
+        # Check the availability of RDP port
+        if ! check_port $RDP_PORT; then
+            echo "RDP port $RDP_PORT is already in use. Please choose a different port."
+        else
+            break
+        fi
+    done
+fi
 
-    # Check the availability of VNC port
-    if ! check_port $VNC_PORT; then
-        echo "VNC port $VNC_PORT is already in use. Please choose a different port."
-        continue
-    fi
+if [ -z "$VNC_PORT" ]; then
+    while true; do
+        read -p "Enter the VNC port: " VNC_PORT
 
-    break
-done
+        # Check the availability of VNC port
+        if ! check_port $VNC_PORT; then
+            echo "VNC port $VNC_PORT is already in use. Please choose a different port."
+        else
+            break
+        fi
+    done
+fi
 
 # Create a unique container name using machine name, RDP port, and VNC port
 CONTAINER_NAME="${MACHINE_NAME}-${RDP_PORT}-${VNC_PORT}"
