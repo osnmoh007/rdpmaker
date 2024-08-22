@@ -12,6 +12,7 @@ PASSWORD=""
 MACHINE_NAME=""
 RDP_PORT=""
 VNC_PORT=""
+VERSION=""
 
 # Function to install Docker
 install_docker() {
@@ -47,6 +48,7 @@ while [[ $# -gt 0 ]]; do
         -m) MACHINE_NAME="$2"; shift ;;
         -R) RDP_PORT="$2"; shift ;;
         -v) VNC_PORT="$2"; shift ;;
+        -V) VERSION="$2"; shift ;;
         *) echo "Unknown option $1"; exit 1 ;;
     esac
     shift
@@ -61,6 +63,7 @@ done
 [[ -z "$PASSWORD" ]] && read -p "Enter password: " PASSWORD
 [[ -z "$RDP_PORT" ]] && read -p "Enter RDP port: " RDP_PORT
 [[ -z "$VNC_PORT" ]] && read -p "Enter VNC port: " VNC_PORT
+[[ -z "$VERSION" ]] && read -p "Enter Windows version (e.g., 2004, 20H2): " VERSION
 
 # Set up container and volume names
 CONTAINER_NAME="${MACHINE_NAME}-${RDP_PORT}-${VNC_PORT}"
@@ -82,7 +85,7 @@ docker run -d \
     -v "${VOLUME_PATH}:/storage" \
     -v "./oem:/oem" \
     --device=/dev/kvm --cap-add NET_ADMIN \
-    -e VERSION="" -e RAM_SIZE="$RAM_SIZE" -e CPU_CORES="$CPU_CORES" \
+    -e VERSION="$VERSION" -e RAM_SIZE="$RAM_SIZE" -e CPU_CORES="$CPU_CORES" \
     -e DISK_SIZE="$DISK_SIZE" -e USERNAME="$USERNAME" -e PASSWORD="$PASSWORD" \
     --name "$CONTAINER_NAME" --restart always dockurr/windows
 
