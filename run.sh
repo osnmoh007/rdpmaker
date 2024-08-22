@@ -20,17 +20,14 @@ check_port() {
 
 # Function to display usage
 usage() {
-    echo "Usage: $0 [-r RAM_SIZE] [-c CPU_CORES] [-d DISK_SIZE] [-m MACHINE_NAME] [-u USERNAME] [-p PASSWORD] [-R RDP_PORT] [-v VNC_PORT] [-h]"
-    echo "  -r  RAM_SIZE       Set RAM size (e.g., 4 for 4G)"
-    echo "  -c  CPU_CORES      Set the number of CPU cores (e.g., 2)"
-    echo "  -d  DISK_SIZE      Set the disk size (e.g., 64 for 64G)"
+    echo "Usage: $0 [-r RAM_SIZE] [-c CPU_CORES] [-d DISK_SIZE] [-u USERNAME] [-p PASSWORD] [-m MACHINE_NAME]"
+    echo "  -r  RAM_SIZE       Set RAM size (e.g., 14 for 14G)"
+    echo "  -c  CPU_CORES      Set the number of CPU cores (e.g., 6)"
+    echo "  -d  DISK_SIZE      Set the disk size (e.g., 64G)"
+    echo "  -u  USERNAME       Set the username for the Windows machine"
+    echo "  -p  PASSWORD       Set the password for the Windows machine"
     echo "  -m  MACHINE_NAME   Set the machine name"
-    echo "  -u  USERNAME       Set the username"
-    echo "  -p  PASSWORD       Set the password"
-    echo "  -R  RDP_PORT       Set the RDP port"
-    echo "  -v  VNC_PORT       Set the VNC port"
-    echo "  -h  Display this help message"
-    exit 0
+    exit 1
 }
 
 # Parse command-line arguments
@@ -38,13 +35,10 @@ while [[ "$#" -gt 0 ]]; do
     case $1 in
         -r) RAM_SIZE="${2}G"; shift ;;
         -c) CPU_CORES="$2"; shift ;;
-        -d) DISK_SIZE="${2}G"; shift ;;
-        -m) MACHINE_NAME="$2"; shift ;;
+        -d) DISK_SIZE="$2"; shift ;;
         -u) USERNAME="$2"; shift ;;
         -p) PASSWORD="$2"; shift ;;
-        -R) RDP_PORT="$2"; shift ;;
-        -v) VNC_PORT="$2"; shift ;;
-        -h) usage ;;
+        -m) MACHINE_NAME="$2"; shift ;;
         *) usage ;;
     esac
     shift
@@ -133,52 +127,53 @@ echo "16) core11: Tiny 11 Core"
 echo "17) tiny11: Tiny 11"
 echo "18) tiny10: Tiny 10"
 
-# Prompt for Windows version selection
-while true; do
-    read -p "Enter the number for the Windows version you want to use: " choice
-    WINDOWS_CODE="${WINDOWS_VERSIONS[$choice]}"
-    
-    if [ -z "$WINDOWS_CODE" ]; then
-        echo "Invalid choice. Please select a valid Windows version."
-    else
-        break
-    fi
-done
+# Prompt for Windows version selection if not set by flag
+if [ -z "$WINDOWS_CODE" ]; then
+    while true; do
+        read -p "Enter the number for the Windows version you want to use: " choice
+        WINDOWS_CODE="${WINDOWS_VERSIONS[$choice]}"
+        
+        if [ -z "$WINDOWS_CODE" ]; then
+            echo "Invalid choice. Please select a valid Windows version."
+        else
+            break
+        fi
+    done
+fi
 
-# Prompt for machine name, username, password, and ports
+# Prompt for machine name, username, password, and ports if not set by flags
 if [ -z "$MACHINE_NAME" ]; then
     read -p "Enter the machine name: " MACHINE_NAME
 fi
+
 if [ -z "$USERNAME" ]; then
     read -p "Enter the username: " USERNAME
 fi
+
 if [ -z "$PASSWORD" ]; then
     read -sp "Enter the password: " PASSWORD
     echo
 fi
 
 # Prompt for RDP port and VNC port, and check for availability
-if [ -z "$RDP_PORT" ]; then
-    while true; do
-        read -p "Enter the RDP port: " RDP_PORT
-        if ! check_port $RDP_PORT; then
-            echo "RDP port $RDP_PORT is already in use. Please choose a different port."
-            continue
-        fi
-        break
-    done
-fi
+while true; do
+    read -p "Enter the RDP port: " RDP_PORT
+    read -p "Enter the VNC port: " VNC_PORT
 
-if [ -z "$VNC_PORT" ]; then
-    while true; do
-        read -p "Enter the VNC port: " VNC_PORT
-        if ! check_port $VNC_PORT; then
-            echo "VNC port $VNC_PORT is already in use. Please choose a different port."
-            continue
-        fi
-        break
-    done
-fi
+    # Check the availability of RDP port
+    if ! check_port $RDP_PORT; then
+        echo "RDP port $RDP_PORT is already in use. Please choose a different port."
+        continue
+    fi
+
+    # Check the availability of VNC port
+    if ! check_port $VNC_PORT; then
+        echo "VNC port $VNC_PORT is already in use. Please choose a different port."
+        continue
+    fi
+
+    break
+done
 
 # Create a unique container name using machine name, RDP port, and VNC port
 CONTAINER_NAME="${MACHINE_NAME}-${RDP_PORT}-${VNC_PORT}"
@@ -216,4 +211,8 @@ docker run -d \
     --restart always \
     dockurr/windows
 
-echo "Script execution complete."
+# Fetch the external IP address
+EXTERNAL_IP=$(curl -s ifconfig.me)
+
+# Display completion message
+echo "All done! You can access VNC via $EXTERNAL_IP:$VNC_PORT or access RDP via $EXTERNAL_IP:$RDP_PORT."
