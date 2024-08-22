@@ -1,92 +1,160 @@
 #!/bin/bash
 
 # Default values
-DEFAULT_RAM_SIZE="14G"
-DEFAULT_CPU_CORES="6"
-DEFAULT_DISK_SIZE="64G"
-RAM_SIZE=""
-CPU_CORES=""
-DISK_SIZE=""
-USERNAME=""
-PASSWORD=""
-MACHINE_NAME=""
-RDP_PORT=""
-VNC_PORT=""
-VERSION=""
-
-# Function to check if a port is in use
-check_port() {
-    local PORT=$1
-    if sudo netstat -tuln | grep -q ":$PORT"; then
-        return 1  # Port is in use
-    else
-        return 0  # Port is free
-    fi
-}
+DEFAULT_RAM_SIZE=14
+DEFAULT_CPU_CORES=6
+DEFAULT_DISK_SIZE=64
+DEFAULT_USER="admin"
+DEFAULT_PASSWORD="password"
+DEFAULT_MACHINE_NAME="default"
+DEFAULT_RDP_PORT=3389
+DEFAULT_VNC_PORT=5900
 
 # Function to display usage
 usage() {
-    echo "Usage: $0 [-r RAM_SIZE] [-c CPU_CORES] [-d DISK_SIZE] [-u USERNAME] [-p PASSWORD] [-m MACHINE_NAME] [-R RDP_PORT] [-v VNC_PORT] [-V VERSION]"
+    echo "Usage: $0 [-r RAM_SIZE] [-c CPU_CORES] [-d DISK_SIZE] [-u USERNAME] [-p PASSWORD] [-m MACHINE_NAME] [-R RDP_PORT] [-v VNC_PORT] [-V WINDOWS_VERSION]"
     echo "  -r  RAM_SIZE       Set RAM size (e.g., 14 for 14G)"
     echo "  -c  CPU_CORES      Set the number of CPU cores (e.g., 6)"
-    echo "  -d  DISK_SIZE      Set the disk size (e.g., 64)"
+    echo "  -d  DISK_SIZE      Set the disk size (e.g., 64 for 64G)"
     echo "  -u  USERNAME       Set the username for the Windows machine"
     echo "  -p  PASSWORD       Set the password for the Windows machine"
     echo "  -m  MACHINE_NAME   Set the machine name"
-    echo "  -R  RDP_PORT       Set the RDP port"
-    echo "  -v  VNC_PORT       Set the VNC port"
-    echo "  -V  VERSION        Set the Windows version (e.g., win11, win10)"
+    echo "  -R  RDP_PORT       Set the RDP port (numeric)"
+    echo "  -v  VNC_PORT       Set the VNC port (numeric)"
+    echo "  -V  WINDOWS_VERSION Set the Windows version (e.g., win11)"
     exit 1
 }
 
-# Check if the distro is Ubuntu
-if [[ "$(lsb_release -is)" != "Ubuntu" ]]; then
-    echo "This script is designed to run on Ubuntu. It may not work properly on other distributions."
-    read -p "Do you want to proceed? (y/n): " proceed
-    if [[ "$proceed" != "y" ]]; then
-        exit 1
-    fi
-fi
+# Function to check if a string is a valid number
+is_number() {
+    [[ "$1" =~ ^[0-9]+$ ]]
+}
 
-# Parse command-line arguments
-while [[ "$#" -gt 0 ]]; do
-    case $1 in
-        -r) RAM_SIZE="${2}G"; shift ;;
-        -c) CPU_CORES="$2"; shift ;;
-        -d) DISK_SIZE="${2}G"; shift ;;
-        -u) USERNAME="$2"; shift ;;
-        -p) PASSWORD="$2"; shift ;;
-        -m) MACHINE_NAME="$2"; shift ;;
-        -R) RDP_PORT="$2"; shift ;;
-        -v) VNC_PORT="$2"; shift ;;
-        -V) VERSION="$2"; shift ;;
-        -h) usage ;;
-        *) usage ;;
+# Function to display available Windows versions
+display_windows_versions() {
+    echo "Available Windows versions:"
+    echo "1) win11: Windows 11 Pro"
+    echo "2) win11e: Windows 11 Enterprise"
+    echo "3) win10: Windows 10 Pro"
+    echo "4) ltsc10: Windows 10 LTSC"
+    echo "5) win10e: Windows 10 Enterprise"
+    echo "6) win8: Windows 8.1 Pro"
+    echo "7) win8e: Windows 8.1 Enterprise"
+    echo "8) win7: Windows 7 Enterprise"
+    echo "9) vista: Windows Vista Enterprise"
+    echo "10) winxp: Windows XP Professional"
+    echo "11) 2022: Windows Server 2022"
+    echo "12) 2019: Windows Server 2019"
+    echo "13) 2016: Windows Server 2016"
+    echo "14) 2012: Windows Server 2012"
+    echo "15) 2008: Windows Server 2008"
+    echo "16) core11: Tiny 11 Core"
+    echo "17) tiny11: Tiny 11"
+    echo "18) tiny10: Tiny 10"
+}
+
+# Function to install Docker
+install_docker() {
+    DISTRO=$(lsb_release -is)
+    echo "Installing Docker on $DISTRO system..."
+
+    case "$DISTRO" in
+        Ubuntu|Debian)
+            apt-get update
+            apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+            add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+            apt-get update
+            apt-get install -y docker-ce
+            ;;
+        CentOS)
+            yum install -y yum-utils
+            yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+            yum install -y docker-ce
+            ;;
+        Fedora)
+            dnf install -y dnf-plugins-core
+            dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
+            dnf install -y docker-ce
+            ;;
+        Arch)
+            pacman -Syu --noconfirm docker
+            ;;
+        *)
+            echo "Unsupported distribution: $DISTRO"
+            exit 1
+            ;;
     esac
-    shift
+
+    systemctl start docker
+    systemctl enable docker
+    echo "Docker installed successfully."
+}
+
+# Parse command line arguments
+while getopts ":r:c:d:u:p:m:R:v:V:" opt; do
+    case ${opt} in
+        r) RAM_SIZE="${OPTARG}" ;;
+        c) CPU_CORES="${OPTARG}" ;;
+        d) DISK_SIZE="${OPTARG}" ;;
+        u) USERNAME="${OPTARG}" ;;
+        p) PASSWORD="${OPTARG}" ;;
+        m) MACHINE_NAME="${OPTARG}" ;;
+        R) RDP_PORT="${OPTARG}" ;;
+        v) VNC_PORT="${OPTARG}" ;;
+        V) WINDOWS_VERSION="${OPTARG}" ;;
+        \?) usage ;;
+    esac
 done
+shift $((OPTIND -1))
+
+# Check distro
+DISTRO=$(lsb_release -is)
+if [[ "$DISTRO" != "Ubuntu" ]]; then
+    echo "This script is intended to run on Ubuntu. Proceeding might cause issues."
+    read -p "Do you want to continue? (y/n) [default: y]: " choice
+    choice=${choice:-y}  # Set default to 'y' if no input is provided
+    case "$choice" in
+        y|Y) ;;
+        *) exit ;;
+    esac
+fi
 
 # Prompt for missing values
 if [[ -z "$RAM_SIZE" ]]; then
     read -p "Enter RAM size (e.g., 14 for 14G): " RAM_SIZE
-    RAM_SIZE="${RAM_SIZE}G"
+fi
+
+if ! is_number "$RAM_SIZE"; then
+    echo "Invalid RAM_SIZE. Please enter a valid number."
+    exit 1
 fi
 
 if [[ -z "$CPU_CORES" ]]; then
     read -p "Enter number of CPU cores (e.g., 6): " CPU_CORES
 fi
 
+if ! is_number "$CPU_CORES"; then
+    echo "Invalid CPU_CORES. Please enter a valid number."
+    exit 1
+fi
+
 if [[ -z "$DISK_SIZE" ]]; then
-    read -p "Enter disk size in GB (e.g., 64): " DISK_SIZE
-    DISK_SIZE="${DISK_SIZE}G"
+    read -p "Enter disk size (e.g., 64 for 64G): " DISK_SIZE
+fi
+
+if ! is_number "$DISK_SIZE"; then
+    echo "Invalid DISK_SIZE. Please enter a number without 'G'."
+    exit 1
 fi
 
 if [[ -z "$USERNAME" ]]; then
-    read -p "Enter username: " USERNAME
+    read -p "Enter username for the Windows machine: " USERNAME
 fi
 
 if [[ -z "$PASSWORD" ]]; then
-    read -sp "Enter password: " PASSWORD; echo
+    read -s -p "Enter password for the Windows machine: " PASSWORD
+    echo
 fi
 
 if [[ -z "$MACHINE_NAME" ]]; then
@@ -94,128 +162,114 @@ if [[ -z "$MACHINE_NAME" ]]; then
 fi
 
 if [[ -z "$RDP_PORT" ]]; then
-    read -p "Enter RDP port: " RDP_PORT
+    read -p "Enter RDP port (numeric): " RDP_PORT
+fi
+
+if ! is_number "$RDP_PORT"; then
+    echo "Invalid RDP_PORT. Please enter a numeric value."
+    exit 1
 fi
 
 if [[ -z "$VNC_PORT" ]]; then
-    read -p "Enter VNC port: " VNC_PORT
+    read -p "Enter VNC port (numeric): " VNC_PORT
 fi
 
-# Define Windows version codes
-declare -A WINDOWS_VERSIONS=(
-    [1]="win11"
-    [2]="win11e"
-    [3]="win10"
-    [4]="ltsc10"
-    [5]="win10e"
-    [6]="win8"
-    [7]="win8e"
-    [8]="win7"
-    [9]="vista"
-    [10]="winxp"
-    [11]="2022"
-    [12]="2019"
-    [13]="2016"
-    [14]="2012"
-    [15]="2008"
-    [16]="core11"
-    [17]="tiny11"
-    [18]="tiny10"
-)
-
-# Prompt for Windows version if not provided
-if [[ -z "$VERSION" ]]; then
-    echo "Available Windows versions:"
-    for i in "${!WINDOWS_VERSIONS[@]}"; do
-        echo "$i) ${WINDOWS_VERSIONS[$i]}"
-    done
-
-    while true; do
-        read -p "Enter the number for the Windows version you want to use: " choice
-        VERSION="${WINDOWS_VERSIONS[$choice]}"
-        
-        if [[ -z "$VERSION" ]]; then
-            echo "Invalid choice. Please select a valid Windows version."
-        else
-            break
-        fi
-    done
+if ! is_number "$VNC_PORT"; then
+    echo "Invalid VNC_PORT. Please enter a numeric value."
+    exit 1
 fi
 
-# Check for Docker installation
-if ! command -v docker &> /dev/null; then
-    echo "Docker not found. Installing Docker..."
+# Check Windows version
+while [[ -z "$WINDOWS_VERSION" ]]; do
+    display_windows_versions
+    read -p "Enter the Windows version number (e.g., 1 for Windows 11): " VERSION_INPUT
+    case "$VERSION_INPUT" in
+        1) WINDOWS_VERSION="win11" ;;
+        2) WINDOWS_VERSION="win11e" ;;
+        3) WINDOWS_VERSION="win10" ;;
+        4) WINDOWS_VERSION="ltsc10" ;;
+        5) WINDOWS_VERSION="win10e" ;;
+        6) WINDOWS_VERSION="win8" ;;
+        7) WINDOWS_VERSION="win8e" ;;
+        8) WINDOWS_VERSION="win7" ;;
+        9) WINDOWS_VERSION="vista" ;;
+        10) WINDOWS_VERSION="winxp" ;;
+        11) WINDOWS_VERSION="2022" ;;
+        12) WINDOWS_VERSION="2019" ;;
+        13) WINDOWS_VERSION="2016" ;;
+        14) WINDOWS_VERSION="2012" ;;
+        15) WINDOWS_VERSION="2008" ;;
+        16) WINDOWS_VERSION="core11" ;;
+        17) WINDOWS_VERSION="tiny11" ;;
+        18) WINDOWS_VERSION="tiny10" ;;
+        *)
+            echo "Invalid version number. Please try again."
+            WINDOWS_VERSION=""
+            ;;
+    esac
+done
 
-    # Update the package repository
-    echo "Updating package repository..."
-    sudo apt-get update -y
+# Validate Windows version
+case "$WINDOWS_VERSION" in
+    win11|win11e|win10|ltsc10|win10e|win8|win8e|win7|vista|winxp|2022|2019|2016|2012|2008|core11|tiny11|tiny10)
+        ;;
+    *)
+        echo "Invalid version number. Please run the script again and select a valid version."
+        exit 1
+        ;;
+esac
 
-    # Install required packages
-    echo "Installing required packages..."
-    sudo apt-get install -y \
-        apt-transport-https \
-        ca-certificates \
-        curl \
-        gnupg \
-        lsb-release
+# Set default values if not provided
+RAM_SIZE=${RAM_SIZE:-$DEFAULT_RAM_SIZE}
+CPU_CORES=${CPU_CORES:-$DEFAULT_CPU_CORES}
+DISK_SIZE=${DISK_SIZE:-$DEFAULT_DISK_SIZE}
+USERNAME=${USERNAME:-$DEFAULT_USER}
+PASSWORD=${PASSWORD:-$DEFAULT_PASSWORD}
+MACHINE_NAME=${MACHINE_NAME:-$DEFAULT_MACHINE_NAME}
+RDP_PORT=${RDP_PORT:-$DEFAULT_RDP_PORT}
+VNC_PORT=${VNC_PORT:-$DEFAULT_VNC_PORT}
 
-    # Add Docker's official GPG key
-    echo "Adding Docker's official GPG key..."
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-
-    # Set up the stable repository
-    echo "Setting up the Docker stable repository..."
-    echo \
-      "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
-      $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-
-    # Update the package repository again
-    echo "Updating package repository..."
-    sudo apt-get update -y
-
-    # Install Docker Engine
-    echo "Installing Docker Engine..."
-    sudo apt-get install -y docker-ce docker-ce-cli containerd.io
-
-    echo "Docker installation complete."
-else
-    echo "Docker is already installed."
-fi
-
-# Create a unique container name using machine name, RDP port, and VNC port
+# Create volume directory
 CONTAINER_NAME="${MACHINE_NAME}-${RDP_PORT}-${VNC_PORT}"
-
-# Define volume path based on container name
-VOLUME_PATH="/root/windows/$CONTAINER_NAME"
-
-# Create the directory if it doesn't exist
-if [ ! -d "$VOLUME_PATH" ]; then
-    echo "Creating volume directory: $VOLUME_PATH"
-    mkdir -p "$VOLUME_PATH"
-fi
+VOLUME_PATH="/root/windows/${CONTAINER_NAME}"
+mkdir -p "${VOLUME_PATH}"
 
 # Verify Docker installation
-echo "Verifying Docker installation..."
-docker --version
+if ! command -v docker &> /dev/null; then
+    install_docker
+fi
 
-# Run the Docker container with the specified parameters
+# Run Docker container
 echo "Running the Docker container..."
 docker run -d \
-    -p $RDP_PORT:3389/tcp \
-    -p $RDP_PORT:3389/udp \
-    -p $VNC_PORT:8006 \
-    -v "$VOLUME_PATH:/storage" \
-    -v "./oem:/oem" \
+    -p "${RDP_PORT}:3389/tcp" \
+    -p "${RDP_PORT}:3389/udp" \
+    -p "${VNC_PORT}:5900" \
+    -v "${VOLUME_PATH}:/storage" \
+    -v ./oem:/oem \
     --device=/dev/kvm \
     --cap-add NET_ADMIN \
-    -e VERSION="$VERSION" \
-    -e RAM_SIZE="$RAM_SIZE" \
-    -e CPU_CORES="$CPU_CORES" \
-    -e DISK_SIZE="$DISK_SIZE" \
-    -e USERNAME="$USERNAME" \
-    -e PASSWORD="$PASSWORD" \
-    --name "$CONTAINER_NAME" \
+    -e VERSION="${WINDOWS_VERSION}" \
+    -e RAM_SIZE="${RAM_SIZE}G" \
+    -e CPU_CORES="${CPU_CORES}" \
+    -e DISK_SIZE="${DISK_SIZE}G" \
+    -e USERNAME="${USERNAME}" \
+    -e PASSWORD="${PASSWORD}" \
+    --name "${CONTAINER_NAME}" \
     --restart always \
     dockurr/windows
 
-echo "All done! You can access VNC via $(curl -s ifconfig.me):$VNC_PORT or access RDP via $(curl -s ifconfig.me):$RDP_PORT."
+# Check if Docker command was successful
+if [ $? -ne 0 ]; then
+    echo "Failed to run the Docker container."
+    exit 1
+fi
+
+# Display external IP
+EXTERNAL_IP=$(curl -s ifconfig.me)
+if [ $? -ne 0 ]; then
+    echo "Failed to retrieve external IP address."
+    echo "You can see the installation progress on your web browser via the VNC port ${VNC_PORT} or access RDP via the RDP port ${RDP_PORT}."
+else
+    echo "All done! You can access VNC via ${EXTERNAL_IP}:${VNC_PORT} or access RDP via ${EXTERNAL_IP}:${RDP_PORT}."
+fi
