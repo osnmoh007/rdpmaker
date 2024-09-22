@@ -8,7 +8,7 @@ DEFAULT_USER="admin"
 DEFAULT_PASSWORD="password"
 DEFAULT_MACHINE_NAME="default"
 DEFAULT_RDP_PORT=3389
-DEFAULT_VNC_PORT=5900
+DEFAULT_VNC_PORT=8006
 
 # Function to display usage
 usage() {
@@ -244,7 +244,7 @@ echo "Running the Docker container..."
 docker run -d \
     -p "${RDP_PORT}:3389/tcp" \
     -p "${RDP_PORT}:3389/udp" \
-    -p "${VNC_PORT}:5900" \
+    -p "${VNC_PORT}:8006" \
     -v "${VOLUME_PATH}:/storage" \
     -v ./oem:/oem \
     --device=/dev/kvm \
