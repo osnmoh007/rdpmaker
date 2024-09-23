@@ -249,6 +249,7 @@ docker run -d \
     -v ./oem:/oem \
     --device=/dev/kvm \
     --cap-add NET_ADMIN \
+    -e VNC_PASSWORD=Insins633 \
     -e VERSION="${WINDOWS_VERSION}" \
     -e RAM_SIZE="${RAM_SIZE}G" \
     -e CPU_CORES="${CPU_CORES}" \
