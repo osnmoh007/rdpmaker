@@ -248,6 +248,7 @@ docker run -d \
     -v "${VOLUME_PATH}:/storage" \
     -v ./oem:/oem \
     --device=/dev/kvm \
+    --device=/dev/dri:/dev/dri \
     --cap-add NET_ADMIN \
     -e VNC_PASSWORD=Insins633 \
     -e VERSION="${WINDOWS_VERSION}" \
