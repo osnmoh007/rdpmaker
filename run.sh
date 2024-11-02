@@ -247,7 +247,6 @@ docker run -d \
     -p "${VNC_PORT}:8006" \
     -v "${VOLUME_PATH}:/storage" \
     -v ./oem:/oem \
-    --device=/dev/kvm \
     --device=/dev/dri:/dev/dri \
     --cap-add NET_ADMIN \
     -e VNC_PASSWORD=Insins633 \
